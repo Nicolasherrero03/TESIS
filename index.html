@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archivo Vivo - Homepage Final (Contornos)</title>
+
+    <!-- Fuentes de Google eliminadas -->
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.163.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.163.0/examples/jsm/",
+        "gsap": "https://unpkg.com/gsap@3.12.5/index.js"
+      }
+    }
+    </script>
+
+    <style>
+        @font-face {
+            font-family: 'Thermal VF';
+            /* Asegúrate de que el archivo de la fuente esté en la misma carpeta */
+            src: url('Thermal-VF.woff2') format('woff2-variations'); 
+            font-weight: 100 900;
+            font-style: normal italic;
+        }
+
+        
+         body {
+            font-family: 'Thermal VF', monospace;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            /* --- FONDO DEGRADADO Y ANIMADO --- */
+            background: linear-gradient(-45deg, #d9ffc7, #80a6ff, #eef1f5, #fdefee);
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Header (Fijo arriba) */
+        header {
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            z-index: 10;
+            background-color: transparent; /* CAMBIADO */
+            pointer-events: none;
+            padding: 0;
+        }
+        header > * {
+            pointer-events: auto;
+        }
+
+        /* --- Estilos para el Ticker --- */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            padding: 5px 0;
+            border: 3px dotted #1d1d1d;
+            /* --- NUEVO GRADIENTE ANIMADO --- */
+            background: linear-gradient(90deg, #ff8a00, #e52e71, #9c40fc, #2e90e5);
+            background-size: 400% 400%;
+            animation: gradientHeader 10s ease infinite;
+            box-sizing: border-box;
+            display: block;
+        }
+        .ticker-text {
+            display: inline-block;
+            white-space: nowrap;
+            padding-right: 100%; /* Ajuste para keyframes */
+            animation: ticker-right 80s linear infinite; /* Velocidad ajustada */
+        }
+        .ticker-wrap:hover .ticker-text {
+            animation-play-state: paused;
+        }
+        @keyframes ticker-right {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(0%); }
+        }
+
+        /* --- Animación para el gradiente del header --- */
+        @keyframes gradientHeader {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .ticker-text span {
+            display: inline-block;
+            font-size: 1.2rem; /* Tamaño ajustado */
+            line-height: 1.2;
+            vertical-align: middle;
+            color: #fff; /* Texto blanco para mejor contraste */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        /* Fin Estilos Ticker */
+
+        /* Ocultar elementos no usados */
+        .separator-bar, .controls-box, .title-box:not(.ticker-wrap) {
+            display: none;
+        }
+
+        /* Contenedor del Canvas 3D */
+        #animation-container {
+            position: fixed;
+            top: 55px; /* Ajuste para dejar espacio al ticker */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 55px);
+            z-index: 1;
+            cursor: pointer;
+        }
+        #animation-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Sidebar (Fija a la derecha) */
+        .sidebar {
+            position: fixed;
+            top: 20%;
+            right: 15px;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: right center;
+            background: linear-gradient(45deg, #f9d423, #ff4e50); /* CAMBIADO */
+            border: 4px solid #000;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            white-space: nowrap;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* --- Estilos para Elemento Hover Izquierdo --- */
+        .hover-info-left {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 200px;
+            height: 300px;
+            z-index: 15;
+            cursor: pointer;
+            border: 2px solid #ccc;
+            background-color: rgba(255, 255, 255, 0.8);
+            transition: background-color 0.3s ease;
+            overflow: hidden;
+        }
+        .hover-info-left .silhouette {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 1; transition: opacity 0.3s ease; pointer-events: none;
+         }
+         .hover-info-left .silhouette svg { width: 80%; height: 80%; opacity: 0.5; }
+         .hover-info-left .info-content {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding: 15px; box-sizing: border-box; opacity: 0;
+            transition: opacity 0.3s ease; pointer-events: none;
+            display: flex; flex-direction: column; justify-content: center;
+         }
+         .hover-info-left:hover { background-color: rgba(230, 230, 230, 0.9); }
+         .hover-info-left:hover .silhouette { opacity: 0; }
+         .hover-info-left:hover .info-content { opacity: 1; pointer-events: auto; }
+         .info-content h2 { margin: 0 0 10px 0; font-size: 1.2rem; }
+         .info-content p { margin: 0; font-size: 0.9rem; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="ticker-wrap">
+            <div class="ticker-text">
+                <span>Nuestro proyecto propone una plataforma digital interactiva diseñada para analizar y visibilizar la gentrificación en Chacarita. El objetivo no es solo mostrar un "antes y un después", sino deconstruir las fuerzas específicas que están transformando la identidad del barrio y asi permitir al usuario manipularlas para entenderlas mejor.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span>Nuestro proyecto propone una plataforma digital interactiva diseñada para analizar y visibilizar la gentrificación en Chacarita. El objetivo no es solo mostrar un "antes y un después", sino deconstruir las fuerzas específicas que están transformando la identidad del barrio y asi permitir al usuario manipularlas para entenderlas mejor.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span>Nuestro proyecto propone una plataforma digital interactiva diseñada para analizar y visibilizar la gentrificación en Chacarita. El objetivo no es solo mostrar un "antes y un después", sino deconstruir las fuerzas específicas que están transformando la identidad del barrio y asi permitir al usuario manipularlas para entenderlas mejor.&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span>Nuestro proyecto propone una plataforma digital interactiva diseñada para analizar y visibilizar la gentrificación en Chacarita. El objetivo no es solo mostrar un "antes y un después", sino deconstruir las fuerzas específicas que están transformando la identidad del barrio y asi permitir al usuario manipularlas para entenderlas mejor.&nbsp;&;&nbsp;&nbsp;&nbsp;</span>
+            </div>
+        </div>
+    </header>
+
+    <aside class="sidebar" id="randomizeButton">
+        Randomizar Posiciones
+    </aside>
+
+    <div class="hover-info-left">
+        <div class="silhouette">
+             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#555" d="M50,5 A45,45 0 1,1 50,95 A45,45 0 1,1 50,5 M50,15 A35,35 0 1,0 50,85 A35,35 0 1,0 50,15 Z"/>
+             </svg>
+        </div>
+        <div class="info-content">
+            <h2>Información Adicional</h2>
+            <p>Este es el texto que aparece cuando pasas el mouse sobre la silueta.</p>
+        </div>
+    </div>
+
+    <div id="animation-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+        import { gsap } from 'gsap';
+
+        // --- Función para generar colores vibrantes aleatorios ---
+        function getRandomVibrantColor() {
+            const hue = Math.floor(Math.random() * 360);
+            const saturation = 70 + Math.floor(Math.random() * 31); // Rango: 70-100%
+            const lightness = 50 + Math.floor(Math.random() * 11);  // Rango: 50-60%
+            return new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+        }
+
+        // --- Función mapRange ---
+        function mapRange(value, inMin, inMax, outMin, outMax) {
+            if (inMin === inMax) return outMin;
+            return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        }
+
+        try {
+            // --- Capturar Elementos ---
+            const container = document.getElementById('animation-container');
+            const randomizeButton = document.getElementById('randomizeButton');
+
+            // --- Variables Globales 3D ---
+            const bounds = 10;
+            const titleBounds = bounds * 0.8;
+            const speed = 0.03;
+            const boxDepth = 0.2; // Profundidad fija para las cajas
+
+            // --- Configuración Three.js ---
+            const scene = new THREE.Scene();
+            // Se elimina scene.background para que se vea el fondo del body
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 15;
+            // Se añade 'alpha: true' para que el canvas sea transparente
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            container.appendChild(renderer.domElement);
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.enablePan = false;
+
+            // --- Geometrías predefinidas para el efecto de partículas ---
+            const PARTICLE_GEOMETRIES = [
+                new THREE.BoxGeometry(0.5, 0.5, 0.5),
+                new THREE.SphereGeometry(0.3, 16, 16),
+                new THREE.ConeGeometry(0.3, 0.6, 16),
+                new THREE.TorusKnotGeometry(0.2, 0.08, 100, 16)
+            ];
+
+            // --- Datos 3D (sin color, se generará aleatoriamente) ---
+            const boxData = [
+                { id: 'simulacion' },
+                { id: 'barrio'   },
+                { id: 'fenomeno' },
+                { id: 'ar.vivo'  }
+            ];
+            const boxesGroup = new THREE.Group();
+            scene.add(boxesGroup);
+            
+            // --- Materiales Compartidos ---
+            const textMaterialBlack = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 }); // Material de línea negro
+
+            // --- Lógica de Carga de Fuentes (con Fallback) ---
+            const titleFontPath = 'https://unpkg.com/three@0.163.0/examples/fonts/optimer_bold.typeface.json';
+            const bodyFontPath = 'Thermal_VF_Regular.json';
+            const bodyFallbackFontPath = 'https://unpkg.com/three@0.163.0/examples/fonts/helvetiker_regular.typeface.json';
+            
+            const loadedFonts = { title: null, body: null };
+            const fontLoader = new FontLoader();
+            let titleMesh = null;
+
+            // --- Función para Actualizar la Tipografía del Título ---
+            const updateTitleFont = () => {
+                if (!loadedFonts.title) return; // Necesita la fuente del título
+
+                const oldPosition = titleMesh ? titleMesh.position.clone() : new THREE.Vector3(0,0,0);
+                const oldVelocity = titleMesh ? titleMesh.userData.velocity.clone() : new THREE.Vector3( (Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5) ).normalize().setLength(speed * 0.9);
+
+                if (titleMesh) {
+                    scene.remove(titleMesh);
+                    titleMesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material && child.material !== lineMaterial) {
+                            child.material.dispose();
+                        }
+                    });
+                }
+
+                const currentFont = loadedFonts.title; // <-- USA LA FUENTE DEL TÍTULO
+
+                const titleGeometry = new TextGeometry( 'ARCHIVO VIVO', { font: currentFont, size: 1.2, height: 0.2 });
+                titleGeometry.computeBoundingBox();
+                titleGeometry.translate(-(titleGeometry.boundingBox.max.x - titleGeometry.boundingBox.min.x) / 2, 0, 0);
+                
+                // Relleno (con color vibrante aleatorio)
+                const randomColor = getRandomVibrantColor();
+                const titleFillMaterial = new THREE.MeshBasicMaterial({ color: randomColor, opacity: 0.9, transparent: true });
+                const titleFillMesh = new THREE.Mesh(titleGeometry, titleFillMaterial);
+                
+                const titleEdges = new THREE.EdgesGeometry(titleGeometry);
+                const titleLineSegments = new THREE.LineSegments(titleEdges, lineMaterial);
+
+                titleMesh = new THREE.Group();
+                titleMesh.add(titleFillMesh);
+                titleMesh.add(titleLineSegments);
+
+                titleMesh.position.copy(oldPosition);
+                titleMesh.userData.velocity = oldVelocity;
+                titleMesh.userData.id = "title";
+                scene.add(titleMesh);
+            };
+
+            // --- Función para crear la escena una vez que la fuente está cargada ---
+            function createSceneWithFonts() {
+                if (!loadedFonts.body) {
+                    console.error("No se pudo cargar la fuente para el cuerpo de los objetos. La escena no se creará.");
+                    return;
+                }
+                
+                const baseHeight = 1.8;
+                const widthPerChar = 0.5;
+                const minWidth = 2.5;
+
+                // Crear Cajas de Categorías
+                boxData.forEach(data => {
+                    const textLength = data.id.length;
+                    const dynamicWidth = Math.max(minWidth, textLength * widthPerChar);
+                    const size = { w: dynamicWidth, h: baseHeight };
+
+                    const geometry = new THREE.BoxGeometry(size.w, size.h, boxDepth);
+                    
+                    // Asignar color vibrante aleatorio
+                    const randomColor = getRandomVibrantColor();
+                    const material = new THREE.MeshBasicMaterial({ color: randomColor });
+                    const fillMesh = new THREE.Mesh(geometry, material);
+
+                    const edges = new THREE.EdgesGeometry(geometry);
+                    const lineSegments = new THREE.LineSegments(edges, lineMaterial);
+                    
+                    const box = new THREE.Group();
+                    box.add(fillMesh);
+                    box.add(lineSegments);
+                    
+                    box.userData.id = data.id;
+
+                    if (geometry.attributes && geometry.attributes.position) {
+                        box.userData.originalVertices = geometry.attributes.position.clone();
+                    } else { box.userData.originalVertices = null; }
+
+                    box.position.set( (Math.random() - 0.5) * bounds * 1.8, (Math.random() - 0.5) * bounds * 1.8, (Math.random() - 0.5) * bounds * 1.8 );
+                    box.userData.velocity = new THREE.Vector3( (Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5) ).normalize().setLength(speed);
+
+                    const textGeometry = new TextGeometry( data.id, { font: loadedFonts.body, size: 0.6, height: 0.05 }); // <-- USA LA FUENTE DEL CUERPO
+                    textGeometry.computeBoundingBox();
+                    textGeometry.translate(-(textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x) / 2, 0, 0);
+                    const textMesh = new THREE.Mesh(textGeometry, textMaterialBlack);
+                    textMesh.position.z = (boxDepth / 2) + 0.05;
+                    box.add(textMesh);
+                    
+                    boxesGroup.add(box);
+                });
+
+                // Crear Título "ARCHIVO VIVO" inicial
+                updateTitleFont();
+
+                // Iniciar animación
+                animate();
+            }
+
+            // --- Iniciar Carga de Fuentes ---
+            fontLoader.load(titleFontPath,
+                (titleFont) => {
+                    console.log("Fuente del título cargada.");
+                    loadedFonts.title = titleFont;
+
+                    // Ahora que cargó la del título, cargamos la del cuerpo
+                    fontLoader.load(bodyFontPath, 
+                        (bodyFont) => {
+                            console.log(`Fuente local "${bodyFontPath}" cargada correctamente.`);
+                            loadedFonts.body = bodyFont;
+                            createSceneWithFonts(); // Ambas fuentes listas
+                        },
+                        undefined,
+                        (error) => {
+                            console.warn(`No se pudo cargar la fuente local "${bodyFontPath}". Usando fuente de respaldo.`);
+                            fontLoader.load(bodyFallbackFontPath,
+                                (fallbackFont) => {
+                                    console.log('Fuente de respaldo cargada correctamente.');
+                                    loadedFonts.body = fallbackFont;
+                                    createSceneWithFonts(); // Ambas fuentes listas
+                                },
+                                undefined,
+                                (fallbackError) => {
+                                    console.error('¡Error fatal! No se pudo cargar ninguna fuente para el cuerpo.', fallbackError);
+                                    animate();
+                                }
+                            );
+                        }
+                    );
+                },
+                undefined,
+                (titleError) => {
+                    console.error("No se pudo cargar la fuente principal del título. La escena no funcionará correctamente.", titleError);
+                }
+            );
+
+            // --- Bucle de Animación ---
+            let isAnimating = false;
+            function animate() {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                function loop() {
+                    requestAnimationFrame(loop);
+                    // Mover Cajas
+                    boxesGroup.children.forEach(box => {
+                        if (box.userData.velocity) {
+                            box.position.add(box.userData.velocity);
+                            if (box.position.length() > bounds) {
+                               const directionToCenter = box.position.clone().negate().normalize();
+                               box.userData.velocity.copy(directionToCenter).setLength(speed);
+                            }
+                        }
+                    });
+                    // Mover Título
+                    if (titleMesh && titleMesh.userData.velocity) {
+                        titleMesh.position.add(titleMesh.userData.velocity);
+                        if (Math.abs(titleMesh.position.x) > titleBounds) titleMesh.userData.velocity.x *= -1;
+                        if (Math.abs(titleMesh.position.y) > titleBounds) titleMesh.userData.velocity.y *= -1;
+                        if (Math.abs(titleMesh.position.z) > titleBounds) titleMesh.userData.velocity.z *= -1;
+                    }
+
+                    controls.update();
+                    renderer.render(scene, camera);
+                }
+                loop();
+            }
+
+            // --- Función de Randomizar ---
+            function randomizePositions() {
+                const objectsToRandomize = [...boxesGroup.children];
+                
+                objectsToRandomize.forEach(obj => {
+                    // Mover posición
+                    if (obj.userData.velocity) obj.userData.velocity.set(0, 0, 0);
+                    const targetX = (Math.random() - 0.5) * bounds * 1.8;
+                    const targetY = (Math.random() - 0.5) * bounds * 1.8;
+                    const targetZ = (Math.random() - 0.5) * bounds * 1.8;
+                    gsap.to(obj.position, {
+                        x: targetX, y: targetY, z: targetZ,
+                        duration: 1.5, ease: "power2.inOut",
+                        onComplete: () => {
+                            if (obj.userData.velocity) {
+                                const targetSpeed = speed;
+                                obj.userData.velocity.set( (Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5) ).normalize().setLength(targetSpeed);
+                            }
+                        }
+                    });
+
+                    // Cambiar color con transición
+                    const fillMesh = obj.children.find(child => child.isMesh);
+                    if (fillMesh && fillMesh.material) {
+                        const newColor = getRandomVibrantColor();
+                        gsap.to(fillMesh.material.color, {
+                            r: newColor.r, g: newColor.g, b: newColor.b,
+                            duration: 1.5, ease: "power2.inOut"
+                        });
+                    }
+                });
+
+                // También cambia el color del título
+                if (titleMesh) {
+                    const fillMesh = titleMesh.children.find(child => child.isMesh);
+                    if (fillMesh && fillMesh.material) {
+                        const newColor = getRandomVibrantColor();
+                        gsap.to(fillMesh.material.color, {
+                            r: newColor.r, g: newColor.g, b: newColor.b,
+                            duration: 1.5, ease: "power2.inOut"
+                        });
+                    }
+                }
+            }
+
+            // --- Función para crear explosión de formas ---
+            function createBurstEffect(originPosition) {
+                const particleCount = 20;
+                const burstRadius = 15;
+
+                for (let i = 0; i < particleCount; i++) {
+                    const geometry = PARTICLE_GEOMETRIES[Math.floor(Math.random() * PARTICLE_GEOMETRIES.length)].clone();
+                    const color = getRandomVibrantColor();
+                    const material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 1 });
+                    const fillMesh = new THREE.Mesh(geometry, material);
+                    const edges = new THREE.EdgesGeometry(geometry);
+                    const line = new THREE.LineSegments(edges, lineMaterial);
+                    const particle = new THREE.Group();
+                    particle.add(fillMesh);
+                    particle.add(line);
+                    particle.position.copy(originPosition);
+                    particle.scale.set(0.01, 0.01, 0.01);
+                    scene.add(particle);
+
+                    const targetPosition = new THREE.Vector3().setFromSphericalCoords(
+                        burstRadius * (0.5 + Math.random() * 0.5),
+                        Math.acos(2 * Math.random() - 1),
+                        Math.random() * 2 * Math.PI
+                    ).add(originPosition);
+
+                    const duration = 4 + Math.random() * 2;
+                    const finalScale = 0.5 + Math.random() * 1.5;
+
+                    gsap.to(particle.position, { x: targetPosition.x, y: targetPosition.y, z: targetPosition.z, duration: duration, ease: "power2.out" });
+                    gsap.to(particle.scale, { x: finalScale, y: finalScale, z: finalScale, duration: duration * 0.8, ease: "elastic.out(1, 0.5)" });
+                    gsap.to(particle.rotation, { x: Math.random() * Math.PI * 4, y: Math.random() * Math.PI * 4, duration: duration, ease: "power2.out" });
+                    gsap.to(material, {
+                        opacity: 0,
+                        duration: duration * 0.5,
+                        delay: duration * 0.5,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            scene.remove(particle);
+                            geometry.dispose();
+                            material.dispose();
+                            edges.dispose();
+                        }
+                    });
+                }
+            }
+
+            // --- Raycasting para Clics ---
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            function onMouseClick(event) {
+                 const targetClasses = event.target.classList;
+                 if (event.target !== renderer.domElement &&
+                     !targetClasses.contains('hover-info-left') &&
+                     event.target.closest('.hover-info-left') === null &&
+                     event.target.closest('header') === null &&
+                     event.target.closest('.sidebar') === null ) {
+                    return;
+                }
+                 if (event.target.closest('.hover-info-left') || event.target.closest('.sidebar')) {
+                     return;
+                 }
+
+                const rect = container.getBoundingClientRect();
+                mouse.x = (event.clientX / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const objectsToCheck = [...boxesGroup.children];
+                if (titleMesh) objectsToCheck.push(titleMesh);
+                
+                const intersects = raycaster.intersectObjects(objectsToCheck, true);
+
+                if (intersects.length > 0) {
+                    let clickedObject = intersects[0].object;
+                    while (clickedObject && !clickedObject.userData.id && clickedObject.parent !== scene) {
+                        clickedObject = clickedObject.parent;
+                    }
+                    const objectId = clickedObject ? clickedObject.userData.id : null;
+                    const baseId = objectId ? objectId.split('_')[0] : null;
+                    const isValidBoxId = boxData.some(d => d.id === baseId);
+
+                    if (isValidBoxId && baseId !== "title") {
+                        if (baseId === 'simulacion') {
+                            console.log("Redirecting to: simulacion.html");
+                            window.location.href = 'simulacion.html';
+                        } else {
+                            console.log("Redirecting to:", baseId + '.html');
+                            window.location.href = baseId + '.html';
+                        }
+                    } else if (baseId === "title") {
+                        console.log("Clickeado el título 3D. Creando efecto.");
+                        createBurstEffect(titleMesh.position);
+                    }
+                }
+            }
+            container.addEventListener('click', onMouseClick);
+
+            if(randomizeButton) {
+                randomizeButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    randomizePositions();
+                });
+            }
+
+            // --- Responsividad ---
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            });
+
+        } catch (error) {
+            console.error("Error inicializando la aplicación:", error);
+        }
+    </script>
+</body>
+</html>

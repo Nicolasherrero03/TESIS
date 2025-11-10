@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barrio - Galería</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #fff;
+            color: #000;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Título arriba a la derecha */
+        .top-right-title {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-bottom: 2px solid #000;
+        }
+
+        /* Contenedor central para la galería */
+        .gallery-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px; /* Espacio entre cuadrados */
+        }
+
+        /* Estilo de los cuadrados */
+        .gallery-item {
+            width: 200px;
+            height: 200px;
+            border: 3px solid #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: #000;
+            transition: all 0.3s ease;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            background-color: #000;
+            color: #fff;
+            transform: translateY(-5px);
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+        }
+
+        .gallery-item span.label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .gallery-item .icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        /* Estilo para cuadrado deshabilitado (opcional) */
+        .gallery-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+        .gallery-item.disabled:hover {
+            background-color: #f9f9f9;
+            color: #000;
+            transform: none;
+            box-shadow: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-right-title">
+        Línea de tiempo
+    </div>
+
+    <main class="gallery-container">
+        
+        <a href="lineadetiempo1.html" class="gallery-item">
+            
+            <span class="label">Roseti y Lacroze</span>
+        </a>
+</main>
+
+ <div class="top-right-title">
+        Línea de tiempo
+    </div>
+
+   <main class="gallery-container"> 
+
+    
+
+          
+        <a href="lineadetiempo2.html" class="gallery-item">
+
+              <span class="label">Roseti al 741</span>
+
+        </a>
+            
+        </div>
+
+    </main>
+
+</body>
+</html>

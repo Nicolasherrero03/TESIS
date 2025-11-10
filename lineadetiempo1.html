@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barrio - Línea de Tiempo</title>
+
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #fff;
+            color: #000;
+            margin: 0;
+            padding: 20px;
+            height: 100vh; /* Usamos toda la altura disponible */
+            box-sizing: border-box;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header (Sin cambios) --- */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 10px;
+            flex-shrink: 0; /* No se achica */
+            border-bottom: 2px solid #000;
+            margin-bottom: 20px;
+        }
+        .location-text { font-size: 1rem; text-transform: uppercase; }
+        .color-palette { display: flex; gap: 5px; }
+        .color-swatch { width: 20px; height: 20px; border: 1px solid #000; }
+
+        /* --- Área Principal --- */
+        .content-area {
+            flex-grow: 1; /* Ocupa el espacio restante */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden; /* Oculta si la imagen es muy grande */
+        }
+
+        /* --- NUEVO: Estilo de la imagen única --- */
+        .timeline-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Mantiene proporciones sin cortar */
+        }
+
+
+        /* --- NUEVO: Línea de tiempo / Navegación --- */
+        .timeline-nav {
+            flex-shrink: 0; /* No se achica */
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            border-top: 2px solid #000;
+            margin-top: 20px; /* Separación del área de imagen */
+        }
+
+        .timeline-button {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            background: none;
+            /* Borde transparente para que no "salte" al activarse */
+            border: 2px solid transparent; 
+            cursor: pointer;
+            padding: 5px 15px;
+            margin: 0 10px;
+        }
+
+        .timeline-button.active {
+            /* Estilo del botón seleccionado */
+            border: 2px solid #000;
+            font-weight: bold;
+        }
+
+
+        /* --- Enlace de Volver (Sin cambios) --- */
+        .back-link {
+            position: fixed; bottom: 20px; right: 20px; z-index: 30;
+            font-size: 1rem; text-decoration: none; color: #000;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 5px 10px; border: 2px solid #000;
+        }
+        .back-link:hover { background-color: #fff; }
+
+        /* --- Estilos antiguos (ELIMINADOS) --- */
+        /* Ya no se usan #reveal-container, .base-image, .reveal-image */
+
+    </style>
+</head>
+<body>
+
+    <header class="page-header">
+        <span class="location-text">Roseti y Lacroze</span>
+        <div class="color-palette">
+            <div class="color-swatch" style="background-color: #4b0082;"></div>
+            <div class="color-swatch" style="background-color: #000000;"></div>
+            <div class="color-swatch" style="background-color: #f0f0f0; border-color: #aaa;"></div>
+            <div class="color-swatch" style="background-color: #ff0000;"></div>
+            <div class="color-swatch" style="background-color: #555555;"></div>
+            <div class="color-swatch" style="background-color: #111111;"></div>
+        </div>
+    </header>
+
+    <main class="content-area" id="main-container">
+        
+        <img id="timeline-image" class="timeline-image" src="barrio-01.png" alt="Barrio en 2013">
+
+    </main>
+
+    <nav class="timeline-nav">
+        <button id="btn-2013" class="timeline-button active">2013</button>
+        <button id="btn-2025" class="timeline-button">2025</button>
+    </nav>
+
+
+    <a href="index.html" class="back-link">Volver a la Home</a>
+
+    <script>
+        // --- NUEVA LÓGICA DE LÍNEA DE TIEMPO ---
+
+        // Referencias a elementos
+        const btn2013 = document.getElementById('btn-2013');
+        const btn2025 = document.getElementById('btn-2025');
+        const timelineImage = document.getElementById('timeline-image');
+
+        // Evento para el botón 2013
+        btn2013.addEventListener('click', () => {
+            // Cambiar la fuente de la imagen
+            timelineImage.src = 'barrio-01.png';
+            timelineImage.alt = 'Barrio en 2013'; // Actualizar texto alternativo
+            
+            // Actualizar clase 'active' en botones
+            btn2013.classList.add('active');
+            btn2025.classList.remove('active');
+        });
+
+        // Evento para el botón 2025
+        btn2025.addEventListener('click', () => {
+            // Cambiar la fuente de la imagen
+            timelineImage.src = 'barrio-02.png';
+            timelineImage.alt = 'Barrio en 2025'; // Actualizar texto alternativo
+
+            // Actualizar clase 'active' en botones
+            btn2025.classList.add('active');
+            btn2013.classList.remove('active');
+        });
+
+        // --- LÓGICA DE REVELADO CON MOUSE (ELIMINADA) ---
+
+    </script>
+</body>
+</html>

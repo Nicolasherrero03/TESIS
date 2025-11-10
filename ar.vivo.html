@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Página Web con 3D y Animación de Rectángulos</title>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+
+    <style>
+        /* --- NUEVO: Declaración de la fuente --- */
+        @font-face {
+            font-family: 'Thermal VF Light text Italic';
+            /* --- IMPORTANTE: Cambia esta ruta por la ubicación de tu archivo de fuente --- */
+            src: url('fonts/Thermal-VF.woff2') format('woff2'); 
+            font-weight: 300; /* Light */
+            font-style: italic;
+        }
+
+        /* Reseteo básico */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: sans-serif;
+            background-color: #fdfdfd;
+            overflow: hidden;
+        }
+
+        /* Barra superior (modificada) */
+        .top-bar {
+            width: 100%;
+            height: 30px;
+            border-bottom: 1px solid #333;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            overflow: hidden; /* Oculta el texto que se sale de la barra */
+            display: flex;
+            align-items: center; /* Centra el texto verticalmente */
+        }
+
+        /* --- NUEVO: Estilos para la animación de texto (ticker) --- */
+        .ticker-container {
+            display: flex;
+            width: fit-content; /* Se ajusta al ancho de su contenido */
+            animation: ticker-scroll 30s linear infinite;
+        }
+
+        .ticker-content {
+            display: flex;
+            white-space: nowrap; /* Evita que el texto se parta en varias líneas */
+        }
+
+        .ticker-content span {
+            font-family: 'Thermal VF Light text Italic', serif; /* Aplica la fuente personalizada */
+            font-style: italic; /* --- CAMBIO: Asegura que el estilo sea itálico --- */
+            font-size: 1.1rem;
+            color: white;
+            padding: 0 1.5rem; /* Espacio entre cada "Archivo Vivo" */
+        }
+
+        /* Animación del degradado (sin cambios) */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- NUEVO: Animación para el texto que se desplaza --- */
+        @keyframes ticker-scroll {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                /* Se desplaza la mitad de su ancho total, creando un bucle perfecto */
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Contenedor principal y fondo (sin cambios) */
+        .content {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 30px);
+        }
+        .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            --start-color: #e73c7e;
+            --end-color: #e0e0e0;
+            background: linear-gradient(-45deg, var(--start-color), var(--end-color));
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        /* Visor 3D y caja de info (sin cambios) */
+        model-viewer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            z-index: 10;
+        }
+        
+        /* --- CAMBIOS AQUÍ: Estilo para el botón de descarga y de inicio --- */
+        /* Aplicamos estilos comunes a ambos botones */
+        #downloadButton, #homeButton {
+            position: absolute;
+            bottom: 40px;
+            z-index: 10;
+            padding: 12px 24px;
+            font-family: 'Thermal VF Light text Italic', sans-serif;
+            font-size: 1rem;
+            color: white; /* Cambiamos el color del texto a blanco para que contraste con el degradado */
+            border: none; /* Quitamos el borde sólido, el degradado actuará como borde visual */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease; /* Transición para un efecto al pasar el ratón */
+            text-decoration: none; /* Para el botón de inicio */
+
+            /* --- NUEVOS ESTILOS DEGRADADO --- */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); /* Degradado inicial */
+            background-size: 400% 400%; /* Permite la animación del degradado */
+            animation: gradientAnimation 10s ease infinite; /* Animación de fondo */
+        }
+
+        #downloadButton {
+            right: 40px;
+        }
+
+        #homeButton {
+            left: 40px;
+        }
+
+        #downloadButton:hover, #homeButton:hover {
+            transform: translateY(-3px); /* Un pequeño levantamiento al pasar el ratón */
+        }
+        
+        /* --- CAMBIO: Estilo para los rectángulos con degradado --- */
+        .burst-rect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            /* Se aplican dos animaciones: una para el movimiento y otra para el degradado */
+            animation: burst-hold-fade 5s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+                        rectGradientAnimation 8s ease infinite alternate;
+            z-index: 1;
+            will-change: transform, opacity;
+            /* El fondo ahora es un degradado que usa variables CSS */
+            background: linear-gradient(-45deg, var(--rect-start-color), var(--rect-end-color));
+            background-size: 200% 200%;
+        }
+
+        /* --- NUEVO: Animación para el degradado de los rectángulos --- */
+        @keyframes rectGradientAnimation {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        /* Animación de los elementos (modificada para movimiento sutil) */
+        @keyframes burst-hold-fade {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            30% {
+                transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot));
+                opacity: 1;
+            }
+            60% {
+                transform: translate(calc(var(--tx) + 8px), calc(var(--ty) - 8px)) scale(1.03) rotate(calc(var(--rot) + 5deg));
+                opacity: 1;
+            }
+            90% {
+                transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot));
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot));
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="ticker-container">
+            <div class="ticker-content">
+                <span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span>
+            </div>
+            <div class="ticker-content" aria-hidden="true">
+                <span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span><span>Archivo Vivo</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="content">
+
+        <model-viewer 
+            id="logo-3d" 
+            src="AVblend.glb" 
+            alt="Logo 3D AV"
+            auto-rotate
+            camera-controls
+            shadow-intensity="1"
+            style="background-color: transparent;"
+        >
+        </model-viewer>
+
+        <a href="index.html" id="homeButton">Volver al Inicio</a>
+        
+        <button id="downloadButton">Descarga tu archivo</button>
+
+    </main>
+
+    <script>
+        const container = document.querySelector('.content');
+
+        // --- SCRIPT PARA EL FONDO DINÁMICO (sin cambios) ---
+        const saturatedColors = [
+            '#ee7752', '#e73c7e', '#23a6d5', '#23d5ab', '#d94a4a', '#9f7aea'
+        ];
+
+        function getRandomLightGray() {
+            const value = Math.floor(Math.random() * 56) + 200; 
+            const hexValue = value.toString(16).padStart(2, '0');
+            return `#${hexValue}${hexValue}${hexValue}`;
+        }
+
+        function updateGradient() {
+            const newSaturatedColor = saturatedColors[Math.floor(Math.random() * saturatedColors.length)];
+            const newGray = getRandomLightGray();
+            container.style.setProperty('--start-color', newSaturatedColor);
+            container.style.setProperty('--end-color', newGray);
+        }
+
+        container.addEventListener('animationiteration', updateGradient);
+        updateGradient();
+
+
+        // --- CAMBIO: SCRIPT PARA CREAR RECTÁNGULOS CON DEGRADADOS ---
+
+        // --- NUEVO: Funciones de ayuda para generar colores aleatorios ---
+        function getRandomSaturatedColor() {
+            const hue = Math.random() * 360;
+            return `hsl(${hue}, 90%, 60%)`; // Tono aleatorio, alta saturación, buena luminosidad
+        }
+
+        function getRandomGray() {
+            const value = Math.floor(Math.random() * 151) + 50; // Un gris entre oscuro y claro
+            return `rgb(${value}, ${value}, ${value})`;
+        }
+
+        function createBurstRectangle() {
+            const rect = document.createElement('div');
+            rect.className = 'burst-rect';
+
+            const width = Math.random() * 120 + 40;
+            const height = Math.random() * 80 + 20;
+            
+            // --- NUEVO: Lógica para generar los colores del degradado ---
+            let startColor, endColor;
+            
+            // El 80% de las veces, el degradado es de gris a color
+            if (Math.random() > 0.2) {
+                startColor = getRandomGray();
+                endColor = getRandomSaturatedColor();
+            } else { // El 20% restante, es de color a color para más variedad
+                startColor = getRandomSaturatedColor();
+                endColor = getRandomSaturatedColor();
+            }
+
+            // Aleatorizar el orden para que no siempre el gris esté al inicio
+            if (Math.random() > 0.5) {
+                [startColor, endColor] = [endColor, startColor];
+            }
+            
+            const finalX = (Math.random() - 0.5) * window.innerWidth * 0.8;
+            const finalY = (Math.random() - 0.4) * window.innerHeight * 0.9;
+            const rotation = (Math.random() - 0.5) * 720;
+
+            rect.style.width = `${width}px`;
+            rect.style.height = `${height}px`;
+            
+            // Se asignan los colores a las variables CSS del rectángulo
+            rect.style.setProperty('--rect-start-color', startColor);
+            rect.style.setProperty('--rect-end-color', endColor);
+
+            // Se asignan las variables para la animación de movimiento
+            rect.style.setProperty('--tx', `${finalX}px`);
+            rect.style.setProperty('--ty', `${finalY}px`);
+            rect.style.setProperty('--rot', `${rotation}deg`);
+
+            container.appendChild(rect);
+
+            rect.addEventListener('animationend', () => {
+                // Esto se activará cuando la animación 'burst-hold-fade' (de 5s) termine
+                rect.remove();
+            });
+        }
+
+        setInterval(createBurstRectangle, 150);
+    </script>
+</body>
+</html>

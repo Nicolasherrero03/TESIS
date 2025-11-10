@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diapositiva con Parallax y 3D</title>
+
+    <style>
+        /* Estilos generales del cuerpo */
+        body {
+            margin: 0;
+            font-family: 'Thermal Vf', Times, serif;
+            background-color: #f9f9f9; /* Color de fondo suave */
+        }
+
+        /* CONTENEDOR PRINCIPAL FLEX */
+        .main-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* COLUMNA IZQUIERDA: TEXTOS */
+        .text-column {
+            width: 50%; /* Ocupa la mitad izquierda */
+            padding: 50px;
+            box-sizing: border-box;
+        }
+
+        /* COLUMNA DERECHA: IMÁGENES (STICKY) */
+        .image-column {
+            width: 50%; /* Ocupa la mitad derecha */
+            height: 100vh; /* Altura completa de la ventana */
+            position: sticky; /* SE QUEDA FIJO */
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Para que las imágenes no se salgan */
+            background-color: #fff; /* Fondo blanco para las imágenes */
+            border-left: 1px solid #eee; /* Separador sutil */
+        }
+
+        /* ESTILOS DE LAS DIAPOSITIVAS DE TEXTO */
+        .text-slide {
+            min-height: 80vh; /* Altura mínima para cada bloque de texto */
+            display: flex;
+            align-items: center;
+            /* Opcional: un borde suave para ver dónde termina cada slide */
+            /* border-bottom: 1px dashed #ccc; */
+        }
+
+        .texto {
+            font-size: 2.5rem; /* Un poco más pequeño para que quepa bien */
+            line-height: 1.4;
+            color: #333;
+        }
+
+        /* IMÁGENES EN LA COLUMNA DERECHA */
+        .sticky-image {
+            position: absolute;
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+            opacity: 0;     /* Ocultas por defecto */
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translateY(20px); /* Pequeño efecto de entrada */
+        }
+
+        /* Clase para mostrar la imagen activa */
+        .sticky-image.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Eliminamos el estilo de #three-container-sticky ya que no lo usaremos */
+        /* Contenedor especial para los videos en la columna derecha */
+        .video-container-sticky {
+            position: absolute;
+            width: 80%;
+            height: auto;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .video-container-sticky.active {
+            opacity: 1;
+        }
+        .video-scrubber {
+            width: 100%;
+            display: block;
+        }
+
+        /* Highlight (sin cambios) */
+        .texto .highlight {
+            background-color: red;
+            color: rgb(0, 0, 0);
+            font-weight: bold;
+            transition: font-family 0.2s ease-in-out;
+        }
+
+        /* Scrollbar y botones (sin cambios importantes, solo ajuste de posición si es necesario) */
+        .scrollbar-decorativo {
+            position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+            width: 12px; height: 150px; background-color: #E0E0E0; border-radius: 6px; z-index: 100;
+        }
+        .scrollbar-thumb {
+            width: 12px; height: 30px; background-color: #333; border-radius: 6px; position: absolute; top: 0;
+        }
+        #goToTopBtn, #goToHomeBtn { z-index: 101; } /* Asegurar que estén por encima */
+        #goToTopBtn { display: none; position: fixed; bottom: 80px; left: 20px; border: none; background-color: #333; color: white; cursor: pointer; padding: 10px 12px; border-radius: 50%; font-size: 16px; }
+        #goToHomeBtn { display: none; position: fixed; bottom: 20px; left: 20px; background-color: #333; color: white; padding: 10px; border-radius: 50%; font-size: 16px; text-decoration: none; }
+
+
+        .checkbox-container {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column; /* Apilarlos verticalmente */
+            gap: 12px; /* Espacio entre checkboxes */
+            font-size: 1.25rem; /* Tamaño de letra legible */
+            color: #444;
+        }
+        .checkbox-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal; /* Asegurar que no herede negrita del .texto */
+        }
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.3); /* Hacer el checkbox un poco más grande */
+            accent-color: #333; /* Color del tick */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <div class="text-column">
+            
+            <div class="text-slide" data-target="none"> <p class="texto">
+                    Para explicarte este <span class="highlight">fenómeno</span>, primero necesitamos situarte en un escenario.
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="img-casa">
+                <div style="text-align: left;"> <p class="texto">
+                        Imaginate que siempre viviste en la misma casa con tu familia:
+                    </p>
+                    
+                    <div class="checkbox-container">
+                        <label>
+                            <input type="checkbox" id="chk-familia" class="casa-option"> Familia grande
+                        </label>
+                        <label>
+                            <input type="checkbox" id="chk-plantas" class="casa-option"> Plantas
+                        </label>
+                        <label>
+                            <input type="checkbox" id="chk-mascota" class="casa-option"> Mascota
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="text-slide" data-target="img-panaderia">
+                <p class="texto">
+                    y que en la cuadra de tu casa hay una panadería a la que van a comprar siempre.
+                </p>
+            </div>
+
+           
+
+            <div class="text-slide" data-target="img-cerrada">
+                <p class="texto">
+                    Un día fuiste a comprar pero...
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="none">
+                <p class="texto">
+                    Te llenaste de dudas, pero como tenés hambre vas a una cafetería nueva que abrió hace poco.
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="img-medialuna1">
+                <p class="texto">
+                    Pero los precios son insólitos.
+                </p>
+            </div>
+
+             <div class="text-slide" data-target="img-medialuna2">
+                <p class="texto">
+                    ...en especial comparados con los de la panadería.
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="none">
+                <p class="texto">
+                    ¿Qué está pasando?
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="none">
+                <p class="texto">
+                    Lo que pasó es que empezaron a llegar más locales de cadena con gran capital económico.
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="none">
+                <p class="texto">
+                    Esto provocó que el precio del alquiler suba exponencialmente, y la panadería, a pesar de vender igual que siempre, no seguir pagándolo.
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="none">
+                <p class="texto">
+                    Y esto no es lo único. (o algo asi :p)
+                </p>
+            </div>
+
+            <div class="text-slide" style="min-height: 200vh;" data-target="video-edificios" data-is-video="true">
+                 <p class="texto" style="position: sticky; top: 40vh;"> Se construyen edificios cada vez más altos y parecidos.
+                </p>
+            </div>
+
+            <div class="text-slide" style="min-height: 200vh;" data-target="video-alquileres" data-is-video="true">
+                <p class="texto" style="position: sticky; top: 40vh;">
+                    Los precios de los alquileres suben.
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="none">
+                <p class="texto">
+                    Los vecinos cambian.
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="none">
+                <p class="texto">
+                    Entre otros problemas (acá me gustaría poner algo de la simulación)
+                </p>
+            </div>
+
+            <div class="text-slide" data-target="none">
+                <p class="texto">
+                    A este fenómeno se lo conoce como gentrificación.
+                </p>
+            </div>
+
+        </div> 
+        
+        <div class="image-column">
+            
+            <img id="img-casa" src="scrolli-01.png" class="sticky-image" alt="Casa">
+            
+            <img id="img-panaderia" src="scrolli-09.png" class="sticky-image" alt="Panadería">
+            <img id="img-cerrada" src="scrolli-10.png" class="sticky-image" alt="Cerrado">
+            <img id="img-medialuna1" src="scrolli-11.png" class="sticky-image" alt="Medialuna 1">
+            <img id="img-medialuna2" src="scrolli-12.png" class="sticky-image" alt="Medialuna 2">
+
+            <div id="video-edificios" class="video-container-sticky">
+                <video class="video-scrubber" src="grafico1ok.mp4" muted playsinline></video>
+            </div>
+            <div id="video-alquileres" class="video-container-sticky">
+                <video class="video-scrubber" src="grafico2ok.mp4" muted playsinline></video>
+            </div>
+
+        </div> 
+    </div> 
+    
+    <div class="scrollbar-decorativo"><div class="scrollbar-thumb"></div></div>
+    <button id="goToTopBtn" title="Ir arriba">^</button>
+    <a href="index.html" id="goToHomeBtn" title="Ir al Home">🏠</a>
+
+
+    <script>
+        // --- ELEMENTOS ---
+        const textSlides = document.querySelectorAll('.text-slide');
+        // MODIFICADO: stickyElements ya no incluye el contenedor 3D
+        const stickyElements = document.querySelectorAll('.sticky-image, .video-container-sticky'); 
+        const thumb = document.querySelector('.scrollbar-thumb');
+        const track = document.querySelector('.scrollbar-decorativo');
+        const topBtn = document.querySelector('#goToTopBtn');
+        const homeBtn = document.querySelector('#goToHomeBtn');
+
+        // --- 1. INTERSECTION OBSERVER PARA CAMBIAR IMÁGENES ---
+        const observerOptions = {
+            root: null,
+            rootMargin: '-40% 0px -40% 0px', 
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const targetId = entry.target.getAttribute('data-target');
+                    
+                    // Ocultar todos los elementos sticky primero
+                    stickyElements.forEach(el => el.classList.remove('active'));
+
+                    // Si hay un target válido, mostrarlo
+                    if (targetId && targetId !== 'none') {
+                        const targetElement = document.getElementById(targetId);
+                        if (targetElement) {
+                            targetElement.classList.add('active');
+                        }
+                    }
+                }
+            });
+        }, observerOptions);
+
+        textSlides.forEach(slide => observer.observe(slide));
+
+
+        // --- 2. SCRUBBING DE VIDEO (Mismo código, solo se asegura de no buscar el 3D) ---
+        function handleVideoScrubbing() {
+            textSlides.forEach(slide => {
+                if (slide.getAttribute('data-is-video') === 'true') {
+                    const videoId = slide.getAttribute('data-target');
+                    const videoContainer = document.getElementById(videoId);
+                    const video = videoContainer ? videoContainer.querySelector('video') : null;
+
+                    if (video && video.duration) {
+                        const rect = slide.getBoundingClientRect();
+                        const viewportHeight = window.innerHeight;
+                        
+                        let progress = (viewportHeight / 2 - rect.top) / rect.height;
+                        
+                        progress = Math.max(0, Math.min(1, progress));
+                        
+                        if (videoContainer.classList.contains('active')) {
+                             video.currentTime = progress * video.duration;
+                        }
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('scroll', handleVideoScrubbing);
+
+
+        // --- 3. ELIMINAMOS TDO EL CÓDIGO DE THREE.JS ---
+        // ya no es necesario initThreeJS, animateThree, etc.
+        
+        // --- 4. PRECARGA DE VIDEOS ---
+        function initVideos() {
+            document.querySelectorAll('.video-scrubber').forEach(video => {
+                video.addEventListener('loadedmetadata', () => {
+                    video.pause();
+                    video.currentTime = 0;
+                });
+                video.load(); // Forzar carga inicial
+            });
+        }
+
+        // --- 5. SCROLLBAR DECORATIVO Y BOTONES (Mismo código) ---
+        function handleDecorativeScroll() {
+             const scrollTop = window.scrollY;
+             const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+             const scrollPercent = docHeight > 0 ? scrollTop / docHeight : 0; // Evitar división por cero
+             if (thumb && track) {
+                 thumb.style.top = (scrollPercent * (track.offsetHeight - thumb.offsetHeight)) + 'px';
+             }
+             if (topBtn) topBtn.style.display = scrollTop > 300 ? 'block' : 'none';
+             if (homeBtn) homeBtn.style.display = scrollTop > 300 ? 'block' : 'none';
+        }
+        window.addEventListener('scroll', handleDecorativeScroll);
+        if (topBtn) topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+
+        // --- 6. NUEVA FUNCIÓN PARA ACTUALIZAR IMAGEN DE CASA ---
+        function updateCasaImage() {
+            const chkFamilia = document.getElementById('chk-familia');
+            const chkPlantas = document.getElementById('chk-plantas');
+            const chkMascota = document.getElementById('chk-mascota');
+            const imgCasa = document.getElementById('img-casa');
+
+            // Si los elementos no existen, no hacer nada (improbable, pero seguro)
+            if (!chkFamilia || !chkPlantas || !chkMascota || !imgCasa) return;
+
+            const familia = chkFamilia.checked;
+            const plantas = chkPlantas.checked;
+            const mascota = chkMascota.checked;
+            
+            let newImageSrc = "scrolli-01.png"; // Imagen por defecto
+
+            // Lógica de combinaciones (de más específica a menos)
+            if (familia && plantas && mascota) {
+                newImageSrc = "scrolli-08.png";
+            } else if (familia && plantas) {
+                newImageSrc = "scrolli-07.png";
+            } else if (familia && mascota) {
+                newImageSrc = "scrolli-06.png";
+            } else if (plantas && mascota) { // Esto implica familia=false por el orden
+                newImageSrc = "scrolli-04.png";
+            } else if (familia) {
+                newImageSrc = "scrolli-05.png";
+            } else if (plantas) {
+                newImageSrc = "scrolli-03.png";
+            } else if (mascota) {
+                newImageSrc = "scrolli-02.png";
+            }
+            // Si nada está seleccionado, se queda con el default "scrolli-01.png"
+
+            imgCasa.src = newImageSrc;
+        }
+
+
+        // --- INICIALIZACIÓN FINAL ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            initVideos();
+
+            // --- NUEVO: CONECTAR EVENTOS DE CHECKBOX ---
+            document.querySelectorAll('.casa-option').forEach(chk => {
+                chk.addEventListener('change', updateCasaImage);
+            });
+            // --- FIN NUEVO CÓDIGO ---
+        });
+
+    </script>
+</body>
+</html>
